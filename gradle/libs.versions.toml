@@ -1,0 +1,33 @@
+[versions]
+# kotlin
+kotlin = "2.0.20"
+# coroutines
+kotlinx-coroutines-core = "1.9.0"
+# logging
+kotlin-logging-jvm ="7.0.0"
+logback-classic = "1.5.9"
+# mapper
+jackson-databind = "2.18.0"
+# COM-port
+jssc = "2.9.6"
+# test
+junit-jupiter = "5.11.2"
+
+[libraries]
+# kotlin
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+# coroutines
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+# logging
+kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging-jvm" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-classic" }
+# mapper
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
+# COM-port
+jssc = { module = "io.github.java-native:jssc", version.ref = "jssc" }
+# test
+junit-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin"}

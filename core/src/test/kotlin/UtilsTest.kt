@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 class UtilsTest {
 
     @Test
-    fun testMasterContext() {
+    fun crcTest() {
         val hi = 0
         val lo = 0
         val chk = 0x55
