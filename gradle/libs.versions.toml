@@ -1,15 +1,15 @@
 [versions]
 # kotlin
-kotlin = "2.0.20"
+kotlin = "2.2.21"
 # coroutines
-kotlinx-coroutines-core = "1.9.0"
+kotlinx-coroutines-core = "1.10.2"
 # logging
-kotlin-logging-jvm ="7.0.0"
-logback-classic = "1.5.9"
+kotlin-logging-jvm ="7.0.13"
+logback-classic = "1.5.21"
 # mapper
 jackson-databind = "2.18.0"
 # COM-port
-jssc = "2.9.6"
+jssc = "2.10.2"
 # test
 junit-jupiter = "5.11.2"
 

@@ -12,12 +12,7 @@ object ImageProcessorUtils {
         return ImageIO.read(File(fileName))
     }
 
-    fun saveJpg(image: BufferedImage, fileName: String) {
-        val output = File(fileName)
-        ImageIO.write(image, "jpg", output)
-    }
-
-    fun save(image: BufferedImage, fileName: String, imageFormat: ImageFormat) {
+    fun save(image: BufferedImage, fileName: String, imageFormat: ImageFormat = ImageFormat.JPG) {
         val output = File(fileName)
         ImageIO.write(image, imageFormat.format, output)
     }

@@ -14,7 +14,7 @@ class ImageProcessorUtilsTest {
     fun toGrayTest() {
         val rgbImage = ImageProcessorUtils.load(rgbImagePath)
         val grayImage = ImageProcessorUtils.toGray(rgbImage)
-        ImageProcessorUtils.saveJpg(grayImage, grayImagePath)
+        ImageProcessorUtils.save(grayImage, grayImagePath)
     }
 
     @Test
@@ -23,7 +23,7 @@ class ImageProcessorUtilsTest {
         val rgbImage = ImageProcessorUtils.load(rgbImagePath)
         val avgColor = ImageProcessorUtils.getAverageColor(rgbImage)
         val result = ImageProcessorUtils.createMonotonousImage(rgbImage.width, rgbImage.height, rgbImage.type, avgColor)
-        ImageProcessorUtils.saveJpg(result, avgImagePath)
+        ImageProcessorUtils.save(result, avgImagePath)
     }
 
 }
