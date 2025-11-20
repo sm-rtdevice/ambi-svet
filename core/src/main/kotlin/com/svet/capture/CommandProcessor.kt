@@ -18,7 +18,7 @@ import kotlin.system.measureTimeMillis
 private val log = KotlinLogging.logger {}
 
 class CommandProcessor {
-    private val svetConfig = SvetConfig()
+    val connectConfig = SvetConfig.connectConfig()
     private var serialPort: SerialPort? = null
     private var job: Job = Job()
     private var scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -29,7 +29,7 @@ class CommandProcessor {
     fun init() {
         log.debug { "Start initialization..." }
 
-        if (svetConfig.connectConfig.detectPorts) {
+        if (connectConfig.detectPorts) {
             val portNames = SerialPortList.getPortNames()
             if (portNames.isNotEmpty()) {
                 for (portName in portNames) {
@@ -41,7 +41,7 @@ class CommandProcessor {
             }
         }
 
-        serialPort = SerialPort(svetConfig.connectConfig.portNumber)
+        serialPort = SerialPort(connectConfig.portNumber)
 
         log.debug { "Initialization done" }
     }
@@ -51,18 +51,19 @@ class CommandProcessor {
     }
 
     fun connect() {
-        if (serialPort == null) {
-            log.warn { "Port ${svetConfig.connectConfig.portNumber} is not available" }
+        val port = serialPort
+        if (port == null) {
+            log.warn { "Port ${connectConfig.portNumber} is not available" }
             doWork = false
             return
         }
 
-        log.info { "Connect to port ${svetConfig.connectConfig.portNumber}" }
+        log.info { "Connect to port ${connectConfig.portNumber}" }
 
         var fault = true
         try {
-            serialPort!!.openPort()
-            serialPort!!.setParams(
+            port.openPort()
+            port.setParams(
                 SerialPort.BAUDRATE_115200,
                 SerialPort.DATABITS_8,
                 SerialPort.STOPBITS_1,
@@ -71,21 +72,21 @@ class CommandProcessor {
             fault = false
         } catch (ex: UninitializedPropertyAccessException) {
             log.error(ex) {
-                "Uninitialized property exception during connect to port ${svetConfig.connectConfig.portNumber}"
+                "Uninitialized property exception during connect to port ${connectConfig.portNumber}"
             }
         } catch (ex: SerialPortException) {
-            log.error(ex) { "Serial port exception during connect to port ${svetConfig.connectConfig.portNumber}" }
+            log.error(ex) { "Serial port exception during connect to port ${connectConfig.portNumber}" }
         } catch (ex: UnsupportedEncodingException) {
             log.error(ex) {
-                "Unsupported encoding exception during connect to port ${svetConfig.connectConfig.portNumber}"
+                "Unsupported encoding exception during connect to port ${connectConfig.portNumber}"
             }
         } catch (ex: Exception) {
-            log.error(ex) { "Connect to port ${svetConfig.connectConfig.portNumber}" }
+            log.error(ex) { "Connect to port ${connectConfig.portNumber}" }
         }
 
         doWork = if (!fault) {
-            Thread.sleep(svetConfig.connectConfig.arduinoRebootTimeout)
-            log.info { "Connect to port ${svetConfig.connectConfig.portNumber} success" }
+            Thread.sleep(connectConfig.arduinoRebootTimeout)
+            log.info { "Connect to port ${connectConfig.portNumber} success" }
             true
         } else {
             false
@@ -96,23 +97,21 @@ class CommandProcessor {
         doWork = false
         job.join()
 
-        if (serialPort == null) {
-            return
-        }
+        val port = serialPort ?: return
 
-        log.info { "Disconnect from port ${svetConfig.connectConfig.portNumber}" }
+        log.info { "Disconnect from port ${connectConfig.portNumber}" }
         try {
-            serialPort?.closePort()
+            port.closePort()
         } catch (ex: SerialPortException) {
-            log.error(ex) { "Disconnect from port ${svetConfig.connectConfig.portNumber}" }
+            log.error(ex) { "Disconnect from port ${connectConfig.portNumber}" }
             return
         }
 
-        log.info { "Disconnect from port ${svetConfig.connectConfig.portNumber} success" }
+        log.info { "Disconnect from port ${connectConfig.portNumber} success" }
     }
 
     suspend fun reconnect() {
-        log.info { "Reconnect to port ${svetConfig.connectConfig.portNumber}" }
+        log.info { "Reconnect to port ${connectConfig.portNumber}" }
         disconnect()
         connect()
     }
@@ -121,8 +120,9 @@ class CommandProcessor {
      * Запустить задачу.
      * @param command команда для выполнения
      **/
-    suspend fun launch(command: Command) {
-        if (serialPort == null) {
+    fun launch(command: Command) {
+        val port = serialPort
+        if (port == null) {
             log.warn { "COM port is not available, task ${command.name()} is not launched" }
             return
         }
@@ -130,7 +130,7 @@ class CommandProcessor {
         job = scope.launch {
             while (doWork) {
                 val elapsedTime = measureTimeMillis {
-                    serialPort?.writeBytes(command.buffer())
+                    port.writeBytes(command.buffer())
                     delay(1)
                 }
                 print("\rFPS: ${getFps(elapsedTime)}; elapsed: $elapsedTime ms")
@@ -146,12 +146,13 @@ class CommandProcessor {
      * @param command команда для выполнения
      **/
     fun exec(command: Command) {
-        if (serialPort == null) {
+        val port = serialPort
+        if (port == null) {
             log.warn { "COM port is not available, command ${command.name()} is not executed" }
             return
         }
 
-        serialPort?.writeBytes(command.buffer())
+        port.writeBytes(command.buffer())
     }
 
     private fun getFps(elapsedTime: Long): Long {

@@ -8,15 +8,14 @@ import com.svet.config.SvetConfig
  **/
 class Capture : Command {
 
-    private val captureScreen = CaptureScreen() // todo:
-    private val svetConfig = SvetConfig() // todo: singleton только svetConfig.captureConfig
+    private val captureScreen = CaptureScreen()
+    private val captureConfig = SvetConfig.captureConfig()
 
     override fun name(): String {
         return "Capture"
     }
 
     override fun buffer(): ByteArray {
-        val captureConfig = svetConfig.captureConfig
         val regionsCaptureColors = captureScreen.getRegionsCaptureColors(captureScreen.capture(), captureConfig)
         return captureScreen.updateAdaBuffer(regionsCaptureColors, captureConfig).toByteArray()
     }

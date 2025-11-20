@@ -11,25 +11,22 @@ private val log = KotlinLogging.logger {}
  **/
 object ConfigHelper {
 
-    fun <T> loadConfig(fileName: String, valueType: Class<T>, defaultConfig: T): T {
-
-        val config: T = try {
+    fun <T> load(fileName: String, valueType: Class<T>): T? {
+        val config: T? = try {
             ObjectMapper().readValue(Paths.get(fileName).toFile(), valueType)
-        } catch (e: Exception) {
-            log.debug { "No valid configuration found. Create config by default." }
-            // TODO: save if not exist config file (if flag == true)
-            defaultConfig
+        } catch (_: Exception) {
+            log.debug { "No valid configuration ${valueType.name} found. Create by default." }
+            null
         }
 
         return config
     }
 
-    fun <T> saveConfig(fileName: String, config: T) {
+    fun <T> save(fileName: String, config: T) {
         try {
             ObjectMapper().writeValue(Paths.get(fileName).toFile(), config)
         } catch (e: Exception) {
-            log.error(e) { "Error during saving configuration" }
+            log.error(e) { "Error during saving configuration ${config?.javaClass?.name}" }
         }
     }
-
 }

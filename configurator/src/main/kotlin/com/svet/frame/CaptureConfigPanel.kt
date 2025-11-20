@@ -16,7 +16,7 @@ import javax.swing.Timer
 
 class CaptureConfigPanel internal constructor() : JPanel(), ActionListener {
 
-    private val svetConfig = SvetConfig()
+    private val captureConfig = SvetConfig.captureConfig()
     private val verticalFontAlignCorrection = 3
     private val captureScreen = CaptureScreen()
     val timer: Timer = Timer(16, this)
@@ -51,10 +51,10 @@ class CaptureConfigPanel internal constructor() : JPanel(), ActionListener {
     }
 
     private fun drawGridLines(g2D: Graphics2D) {
-        val x = svetConfig.captureConfig.width / 2
-        val y = svetConfig.captureConfig.height / 2
-        g2D.drawLine(x, 0, x, svetConfig.captureConfig.height)
-        g2D.drawLine(0, y, svetConfig.captureConfig.width, y)
+        val x = captureConfig.width / 2
+        val y = captureConfig.height / 2
+        g2D.drawLine(x, 0, x, captureConfig.height)
+        g2D.drawLine(0, y, captureConfig.width, y)
     }
 
     private fun drawCaptureColoredRegion(
@@ -69,31 +69,31 @@ class CaptureConfigPanel internal constructor() : JPanel(), ActionListener {
             // вокруг области захвата
             g2D.paint = Color.RED
             g2D.drawRect(
-                svetConfig.captureConfig.positions[ledNumber].x - svetConfig.captureConfig.border,
-                svetConfig.captureConfig.positions[ledNumber].y - svetConfig.captureConfig.border,
-                svetConfig.captureConfig.captureRegionWidth + svetConfig.captureConfig.border,
-                svetConfig.captureConfig.captureRegionHeight + svetConfig.captureConfig.border
+                captureConfig.positions[ledNumber].x - captureConfig.border,
+                captureConfig.positions[ledNumber].y - captureConfig.border,
+                captureConfig.captureRegionWidth + captureConfig.border,
+                captureConfig.captureRegionHeight + captureConfig.border
             )
 
             // вокруг усредненного цвета области захвата
             g2D.paint = Color.green
             g2D.drawRect(
-                svetConfig.captureConfig.positions[ledNumber].x - svetConfig.captureConfig.border + ox,
-                svetConfig.captureConfig.positions[ledNumber].y - svetConfig.captureConfig.border + oy,
-                svetConfig.captureConfig.captureRegionWidth + svetConfig.captureConfig.border,
-                svetConfig.captureConfig.captureRegionHeight + svetConfig.captureConfig.border
+                captureConfig.positions[ledNumber].x - captureConfig.border + ox,
+                captureConfig.positions[ledNumber].y - captureConfig.border + oy,
+                captureConfig.captureRegionWidth + captureConfig.border,
+                captureConfig.captureRegionHeight + captureConfig.border
             )
 
             // усредненный цвет
             g2D.drawImage(
                 ImageProcessorUtils.createMonotonousImage(
-                    svetConfig.captureConfig.captureRegionWidth,
-                    svetConfig.captureConfig.captureRegionHeight,
+                    captureConfig.captureRegionWidth,
+                    captureConfig.captureRegionHeight,
                     BufferedImage.TYPE_3BYTE_BGR,
                     colors[ledNumber]
                 ),
-                svetConfig.captureConfig.positions[ledNumber].x + ox,
-                svetConfig.captureConfig.positions[ledNumber].y + oy,
+                captureConfig.positions[ledNumber].x + ox,
+                captureConfig.positions[ledNumber].y + oy,
                 this
             )
 
@@ -101,69 +101,69 @@ class CaptureConfigPanel internal constructor() : JPanel(), ActionListener {
             val ledNumberStr = (ledNumber).toString()
             graphics.drawString(
                 ledNumberStr,
-                svetConfig.captureConfig.positions[ledNumber].x - svetConfig.captureConfig.border + ox + svetConfig.captureConfig.captureRegionWidth / 2 - graphics.fontMetrics.stringWidth(ledNumberStr) / 2,
-                svetConfig.captureConfig.positions[ledNumber].y - svetConfig.captureConfig.border + oy + svetConfig.captureConfig.captureRegionHeight / 2 + verticalFontAlignCorrection
+                captureConfig.positions[ledNumber].x - captureConfig.border + ox + captureConfig.captureRegionWidth / 2 - graphics.fontMetrics.stringWidth(ledNumberStr) / 2,
+                captureConfig.positions[ledNumber].y - captureConfig.border + oy + captureConfig.captureRegionHeight / 2 + verticalFontAlignCorrection
             )
 
             // соединительная линия
             g2D.paint = Color.YELLOW
             g2D.drawLine(
-                svetConfig.captureConfig.positions[ledNumber].x + lx1,
-                svetConfig.captureConfig.positions[ledNumber].y + ly1,
-                svetConfig.captureConfig.positions[ledNumber].x + lx2,
-                svetConfig.captureConfig.positions[ledNumber].y + ly2
+                captureConfig.positions[ledNumber].x + lx1,
+                captureConfig.positions[ledNumber].y + ly1,
+                captureConfig.positions[ledNumber].x + lx2,
+                captureConfig.positions[ledNumber].y + ly2
             )
         }
     }
 
     private fun drawCaptureColoredRegions(g2D: Graphics2D) {
-        val colors = captureScreen.getRegionsCaptureColors(captureScreen.capture(), svetConfig.captureConfig)
+        val colors = captureScreen.getRegionsCaptureColors(captureScreen.capture(), captureConfig)
 
-        g2D.stroke = BasicStroke(svetConfig.captureConfig.border.toFloat())
+        g2D.stroke = BasicStroke(captureConfig.border.toFloat())
 
-        val ox = svetConfig.captureConfig.captureRegionWidth + svetConfig.captureConfig.section
-        val oy = svetConfig.captureConfig.captureRegionHeight + svetConfig.captureConfig.section
+        val ox = captureConfig.captureRegionWidth + captureConfig.section
+        val oy = captureConfig.captureRegionHeight + captureConfig.section
 
-        val vLineX = svetConfig.captureConfig.captureRegionWidth / 2
-        val hLineY = svetConfig.captureConfig.captureRegionHeight / 2
+        val vLineX = captureConfig.captureRegionWidth / 2
+        val hLineY = captureConfig.captureRegionHeight / 2
 
         // области захвата снизу слева
         var offset = 0
         drawCaptureColoredRegion(
-            g2D, colors, offset, svetConfig.captureConfig.bottomCountL,
+            g2D, colors, offset, captureConfig.bottomCountL,
             0, oy * (-1),
-            vLineX, svetConfig.captureConfig.border * (-1), vLineX, svetConfig.captureConfig.section * (-1)
+            vLineX, captureConfig.border * (-1), vLineX, captureConfig.section * (-1)
         )
 
         // области захвата слева
-        offset += svetConfig.captureConfig.bottomCountL
+        offset += captureConfig.bottomCountL
         drawCaptureColoredRegion(
-            g2D, colors, offset, svetConfig.captureConfig.leftCount,
+            g2D, colors, offset, captureConfig.leftCount,
             ox, 0,
-            svetConfig.captureConfig.captureRegionWidth, hLineY, svetConfig.captureConfig.captureRegionWidth + svetConfig.captureConfig.section - svetConfig.captureConfig.border, hLineY
+            captureConfig.captureRegionWidth, hLineY, captureConfig.captureRegionWidth + captureConfig.section - captureConfig.border, hLineY
         )
 
         // области захвата сверху
-        offset += svetConfig.captureConfig.leftCount
+        offset += captureConfig.leftCount
         drawCaptureColoredRegion(
-            g2D, colors, offset, svetConfig.captureConfig.topCount,
+            g2D, colors, offset, captureConfig.topCount,
             0, oy,
-            vLineX, svetConfig.captureConfig.captureRegionHeight, vLineX, svetConfig.captureConfig.section + svetConfig.captureConfig.captureRegionHeight - svetConfig.captureConfig.border
+            vLineX, captureConfig.captureRegionHeight, vLineX, captureConfig.section + captureConfig.captureRegionHeight - captureConfig.border
         )
 
         // области захвата справа
-        offset += svetConfig.captureConfig.topCount
+        offset += captureConfig.topCount
         drawCaptureColoredRegion(
-            g2D, colors, offset, svetConfig.captureConfig.rightCount,
+            g2D, colors, offset, captureConfig.rightCount,
             ox * (-1), 0,
-            (svetConfig.captureConfig.border) * (-1), hLineY, svetConfig.captureConfig.section * (-1), hLineY
+            (captureConfig.border) * (-1), hLineY, captureConfig.section * (-1), hLineY
         )
 
         // области захвата снизу справа
-        offset += svetConfig.captureConfig.rightCount
+        offset += captureConfig.rightCount
         drawCaptureColoredRegion(
-            g2D, colors, offset, svetConfig.captureConfig.bottomCountR, 0, oy * (-1),
-            vLineX, svetConfig.captureConfig.border * (-1), vLineX, svetConfig.captureConfig.section * (-1)
+            g2D, colors, offset, captureConfig.bottomCountR, 0, oy * (-1),
+            vLineX, captureConfig.border * (-1), vLineX, captureConfig.section * (-1)
         )
     }
 

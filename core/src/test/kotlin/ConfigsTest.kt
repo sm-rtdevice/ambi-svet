@@ -8,19 +8,15 @@ class ConfigsTest {
 
     @Test
     fun loadConfigTest() {
-        val svetConfig = SvetConfig()
-        Assertions.assertNotNull(svetConfig.captureConfig)
-        Assertions.assertNotNull(svetConfig.connectConfig)
-
-//        ConfigHelper.saveConfig("capture-config.json", svetConfig.captureConfig)
-//        ConfigHelper.saveConfig("connect-config.json", svetConfig.connectConfig)
+        Assertions.assertNotNull(SvetConfig.captureConfig())
+        Assertions.assertNotNull(SvetConfig.connectConfig())
     }
 
     @Test
     fun loadByDefaultTest() {
-        val config = ConfigHelper.loadConfig("config/capture-config.json", CaptureConfig::class.java, CaptureConfig.defaultConfig())
+        val config = ConfigHelper.load("config/capture-config.json", CaptureConfig::class.java)
 
-        Assertions.assertNotNull(config)
+        Assertions.assertNull(config)
     }
 
 }

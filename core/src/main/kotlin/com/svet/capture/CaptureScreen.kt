@@ -1,6 +1,7 @@
 package com.svet.capture
 
 import com.svet.config.CaptureConfig
+import com.svet.config.SvetConfig
 import com.svet.processor.ImageProcessorUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.awt.Color
@@ -15,7 +16,8 @@ class CaptureScreen {
 
     private val screenRect = Rectangle(Toolkit.getDefaultToolkit().screenSize)
     private val robot = Robot()
-    private var buffer = ArrayList<Byte>(288) //TODO: get from config
+    val captureConfig = SvetConfig.captureConfig() // TODO: прокинуть через конструктор
+    private var buffer = ArrayList<Byte>(captureConfig.initialCapacity)
 
     init {
         buffer.addAll(listOf('A'.code.toByte(), 'd'.code.toByte(), 'a'.code.toByte()))
@@ -23,7 +25,7 @@ class CaptureScreen {
         val lo: Byte = 0
         val chk: Byte = 0x55
         buffer.addAll(listOf(hi, lo, chk))
-        for (i in 6 + 1..288) { //TODO: get from config
+        for (i in 6 + 1..captureConfig.initialCapacity) {
             buffer.add(0)
         }
     }

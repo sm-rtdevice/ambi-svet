@@ -9,69 +9,50 @@ private val log = KotlinLogging.logger {}
 /**
  * Конфигурация приложения.
  **/
-class SvetConfig {
+object SvetConfig {
 
-    private val configDirectory = "config"
-    private val connectConfigFileName = "connect-config.json"
-    private val captureConfigFileName = "capture-config.json"
+    private const val CONFIG_DIRECTORY = "config"
+    private const val CONNECT_CONFIG_FILE_NAME = "connect-config.json"
+    private const val CAPTURE_CONFIG_FILE_NAME = "capture-config.json"
 
-    lateinit var connectConfig: ConnectConfig
-    lateinit var captureConfig: CaptureConfig
-
-    init {
-        loadConfigs()
-    }
-
-    fun loadConfigs() {
-        loadConnectConfig()
-        loadCaptureConfig()
-    }
-
-    fun saveConfigs() {
-        saveConnectConfig()
-        saveCaptureConfig()
-    }
-
-    private fun loadConnectConfig() {
+    fun connectConfig(): ConnectConfig {
         log.debug { "Loading connect configuration..." }
-
-        connectConfig = ConfigHelper.loadConfig(
-            resolveConfigFileName(connectConfigFileName),
-            ConnectConfig::class.java,
-            ConnectConfig() // TODO: ConnectConfig.defaultConfig()
-        )
+        val config = ConfigHelper.load(
+            resolveConfigFileName(CONNECT_CONFIG_FILE_NAME),
+            ConnectConfig::class.java
+        ) ?: ConnectConfig()
 
         log.debug { "Loading connect configuration done" }
+        return config
     }
 
-    private fun loadCaptureConfig() {
+    fun connectConfig(config: ConnectConfig) {
+        Files.createDirectories(Paths.get(CONFIG_DIRECTORY))
+        ConfigHelper.save(resolveConfigFileName(CONNECT_CONFIG_FILE_NAME), config)
+    }
+
+    fun captureConfig(): CaptureConfig {
         log.debug { "Loading capture configuration..." }
+        val config = ConfigHelper.load(
+            resolveConfigFileName(CAPTURE_CONFIG_FILE_NAME),
+            CaptureConfig::class.java
+        ) ?: CaptureConfig.defaultConfig()
 
-        captureConfig = ConfigHelper.loadConfig(
-            resolveConfigFileName(captureConfigFileName),
-            CaptureConfig::class.java,
-            CaptureConfig.defaultConfig()
-        )
-
-        if (captureConfig.positions.isEmpty()) {
+        if (config.positions.isEmpty()) {
             log.warn { "Capture regions configuration was not loaded" }
         }
 
         log.debug { "Loading capture configuration done" }
+        return config
     }
 
-    fun saveConnectConfig() {
-        Files.createDirectories(Paths.get(configDirectory))
-        ConfigHelper.saveConfig(resolveConfigFileName(connectConfigFileName), connectConfig)
-    }
-
-    fun saveCaptureConfig() {
-        Files.createDirectories(Paths.get(configDirectory))
-        ConfigHelper.saveConfig(resolveConfigFileName(captureConfigFileName), captureConfig)
+    fun captureConfig(config: CaptureConfig) {
+        Files.createDirectories(Paths.get(CONFIG_DIRECTORY))
+        ConfigHelper.save(resolveConfigFileName(CAPTURE_CONFIG_FILE_NAME), config)
     }
 
     private fun resolveConfigFileName(fileName: String): String {
-        return configDirectory + "\\" + fileName
+        return CONFIG_DIRECTORY + "\\" + fileName
     }
 
 }

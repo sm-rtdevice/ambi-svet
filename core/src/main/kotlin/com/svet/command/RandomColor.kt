@@ -8,13 +8,13 @@ import com.svet.utils.Utils
  **/
 class RandomColor : Command {
 
-    private val svetConfig = SvetConfig() // todo: singleton только svetConfig.captureConfig
+    private val captureConfig = SvetConfig.captureConfig()
 
     override fun name(): String {
         return "Random Color"
     }
 
     override fun buffer(): ByteArray {
-        return Utils.preparerRandomBuffer(svetConfig.captureConfig).toByteArray()
+        return Utils.preparerRandomBuffer(captureConfig).toByteArray()
     }
 }
