@@ -61,7 +61,7 @@ class Svet {
                 exitProcess(ExitStatus.OK.status)
             }
             INIT -> {
-//            commandProcessor.init() // not supported yet
+//            commandProcessor.init()
                 log.warn { "Command not supported yet" }
                 exitProcess(ExitStatus.NOT_SUPPORTED.status)
             }
