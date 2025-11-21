@@ -16,7 +16,6 @@ class Capture : Command {
     }
 
     override fun buffer(): ByteArray {
-        val regionsCaptureColors = captureScreen.getRegionsCaptureColors(captureScreen.capture(), captureConfig)
-        return captureScreen.updateAdaBuffer(regionsCaptureColors, captureConfig).toByteArray()
+        return captureScreen.getAdaBuffer(captureConfig)
     }
 }
