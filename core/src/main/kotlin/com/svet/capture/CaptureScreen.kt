@@ -20,16 +20,17 @@ class CaptureScreen {
     private val screenRect = Rectangle(Toolkit.getDefaultToolkit().screenSize)
     private val robot = Robot()
     private val captureConfig = SvetConfig.captureConfig() // TODO: прокинуть через конструктор
-    private var buffer = ArrayList<Byte>(captureConfig.initialCapacity) // TODO: ByteArray
+    private val buffer = ByteArray(captureConfig.initialCapacity)
 
     init {
-        buffer.addAll(listOf('A'.code.toByte(), 'd'.code.toByte(), 'a'.code.toByte()))
-        val hi: Byte = 0
-        val lo: Byte = 0
-        val chk: Byte = 0x55
-        buffer.addAll(listOf(hi, lo, chk))
-        for (i in 6 + 1..captureConfig.initialCapacity) {
-            buffer.add(0)
+        buffer[0] = 'A'.code.toByte()
+        buffer[1] = 'd'.code.toByte()
+        buffer[2] = 'a'.code.toByte()
+        buffer[3] = 0 // hi
+        buffer[4] = 0 // lo
+        buffer[5] = 0x55 // chk
+        for (i in 6..buffer.lastIndex) {
+            buffer[i] = 0
         }
     }
 
@@ -78,19 +79,21 @@ class CaptureScreen {
      * @param regionCaptureColors массив цветов для светодиодов
      * @return обновлённый буфер
      */
-    fun updateAdaBuffer(regionCaptureColors: List<Color>): List<Byte> {
-        val capOffset = 6
-        val step = 3
+    fun updateAdaBuffer(regionCaptureColors: List<Color>): ByteArray {
         for (i in 0 until regionCaptureColors.size) {
-            buffer[capOffset + step * i] = regionCaptureColors[i].red.toByte()
-            buffer[capOffset + step * i + 1] = regionCaptureColors[i].green.toByte()
-            buffer[capOffset + step * i + 2] = regionCaptureColors[i].blue.toByte()
-            // todo: test average color
-//            buffer[capOffset + step * i] = getAverageColorChannel(regionCaptureColors[i].red.toByte(), buffer[capOffset + step * i])
-//            buffer[capOffset + step * i + 1] = getAverageColorChannel(regionCaptureColors[i].green.toByte(), buffer[capOffset + step * i + 1])
-//            buffer[capOffset + step * i + 2] = getAverageColorChannel(regionCaptureColors[i].blue.toByte(), buffer[capOffset + step * i + 2])
+            buffer[6 + 3 * i] = regionCaptureColors[i].red.toByte()
+            buffer[7 + 3 * i] = regionCaptureColors[i].green.toByte()
+            buffer[8 + 3 * i] = regionCaptureColors[i].blue.toByte()
         }
+        return buffer
+    }
 
+    fun updateAdaBufferAverageColorChannel(regionCaptureColors: List<Color>): ByteArray {
+        for (i in 0 until regionCaptureColors.size) {
+            buffer[6 + 3 * i] = ImageProcessorUtils.getAverageColorChannel(regionCaptureColors[i].red.toByte(), buffer[6 + 3 * i])
+            buffer[7 + 3 * i] = ImageProcessorUtils.getAverageColorChannel(regionCaptureColors[i].green.toByte(), buffer[7 + 3 * i])
+            buffer[8 + 3 * i] = ImageProcessorUtils.getAverageColorChannel(regionCaptureColors[i].blue.toByte(), buffer[8 + 3 * i])
+        }
         return buffer
     }
 
@@ -100,7 +103,7 @@ class CaptureScreen {
      * @param captureConfig конфигурация захвата
      * @return обновлённый буфер
      */
-    fun updateAdaBuffer(color: Color, captureConfig: CaptureConfig): List<Byte> {
+    fun updateAdaBuffer(color: Color, captureConfig: CaptureConfig): ByteArray {
         val capOffset = 6
         val step = 3
         for (i in 0 until captureConfig.ledsCount) {
@@ -118,9 +121,7 @@ class CaptureScreen {
      * @return обновлённый буфер для отправки в контроллер
      */
     fun getAdaBuffer(captureConfig: CaptureConfig): ByteArray {
-        return updateAdaBuffer(
-            getRegionsCaptureColors(capture(), captureConfig),
-        ).toByteArray()
+        return updateAdaBuffer(getRegionsCaptureColors(capture(), captureConfig))
     }
 
 }

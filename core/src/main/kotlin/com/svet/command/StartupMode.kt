@@ -12,6 +12,6 @@ class StartupMode(private val mode: Byte) : Command {
     }
 
     override fun buffer(): ByteArray {
-        return Utils.setStartupModeCmd(mode).toByteArray()
+        return Utils.setStartupModeCmd(mode)
     }
 }

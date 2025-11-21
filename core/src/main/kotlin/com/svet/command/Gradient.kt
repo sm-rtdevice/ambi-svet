@@ -21,7 +21,7 @@ class Gradient : Command {
     }
 
     override fun buffer(): ByteArray {
-        val buffer = Utils.showSolidColorCmd(colors[i]).toByteArray()
+        val buffer = Utils.showSolidColorCmd(colors[i])
         // в одном направлении
 //        i = (i + direction) % (steps + 1)
 

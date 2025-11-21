@@ -15,6 +15,6 @@ class RandomColor : Command {
     }
 
     override fun buffer(): ByteArray {
-        return Utils.preparerRandomBuffer(captureConfig).toByteArray()
+        return Utils.preparerRandomBuffer(captureConfig)
     }
 }

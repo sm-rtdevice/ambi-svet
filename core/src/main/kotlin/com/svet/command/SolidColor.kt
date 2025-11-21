@@ -13,6 +13,6 @@ class SolidColor(private val color: Color, private val save: Boolean = false) : 
     }
 
     override fun buffer(): ByteArray {
-        return Utils.showSolidColorCmd(color, save).toByteArray()
+        return Utils.showSolidColorCmd(color, save)
     }
 }

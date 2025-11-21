@@ -11,27 +11,20 @@ object Utils {
      * @param captureConfig конфигурация захвата экрана
      * @return массив байтов для контроллера
      **/
-    fun preparerRandomBuffer(captureConfig: CaptureConfig): List<Byte> {
-        val buffer = ArrayList<Byte>(captureConfig.initialCapacity)
-
+    fun preparerRandomBuffer(captureConfig: CaptureConfig): ByteArray {
         val bright: Byte = 100 // 1..127: 1 - max яркость, 127 - min яркость
+        val buffer = ByteArray(captureConfig.initialCapacity)
+        buffer[0] = 'A'.code.toByte()
+        buffer[1] = 'd'.code.toByte()
+        buffer[2] = 'a'.code.toByte()
+        buffer[3] = 0 // hi
+        buffer[4] = 0 // lo
+        buffer[5] = 0x55 // chk
 
-        val hi: Byte = 0
-        val lo: Byte = 0
-        val chk: Byte = 0x55
-
-        buffer.addAll(listOf('A'.code.toByte(), 'd'.code.toByte(), 'a'.code.toByte())) // заголовок
-        buffer.addAll(listOf(hi, lo, chk)) // CRC?
-
-        for (i in 1..captureConfig.ledsCount) {
-            buffer.addAll(
-                listOf(
-//            (-128..127).random().toByte(),  // R
-//            (-128..127).random().toByte(),  // G
-//            (-128..127).random().toByte())) // B
-                    (0..127 / bright).random().toByte(),  // R
-                    (0..127 / bright).random().toByte(),  // G
-                    (0..127 / bright).random().toByte())) // B
+        for (i in 0 until captureConfig.ledsCount) {
+            buffer[6 + 3 * i] = (0..127 / bright).random().toByte() // R
+            buffer[7 + 3 * i] = (0..127 / bright).random().toByte() // G
+            buffer[8 + 3 * i] = (0..127 / bright).random().toByte() // B
         }
 
         return buffer
@@ -44,20 +37,20 @@ object Utils {
      * @param save true - сохранить, false - не сохранять цвет в eeprom контроллера
      * @return массив байтов для контроллера
      **/
-    fun showSolidColorCmd(color: Color, save: Boolean = false): List<Byte> {
-        val hi: Byte = 0
-        val lo: Byte = 0
-        val chk: Byte = 0x55
-
-        return listOf(
-            'c'.code.toByte(), 'm'.code.toByte(), 'd'.code.toByte(),
-            hi, lo, chk, // CRC?
-            ArduinoCommands.SHOW_SOLID_COLOR_CMD.cmd,
-            color.red.toByte(),
-            color.green.toByte(),
-            color.blue.toByte(),
-            if (save) 1 else 0
-        )
+    fun showSolidColorCmd(color: Color, save: Boolean = false): ByteArray {
+        val buffer = ByteArray(11)
+        buffer[0] = 'c'.code.toByte()
+        buffer[1] = 'm'.code.toByte()
+        buffer[2] = 'd'.code.toByte()
+        buffer[3] = 0 // hi
+        buffer[4] = 0 // lo
+        buffer[5] = 0x55 // chk
+        buffer[6] = ArduinoCommands.SHOW_SOLID_COLOR_CMD.cmd
+        buffer[7] = color.red.toByte()
+        buffer[8] = color.green.toByte()
+        buffer[9] = color.blue.toByte()
+        buffer[10] = if (save) 1 else 0
+        return buffer
     }
 
     /**
@@ -66,17 +59,16 @@ object Utils {
      * @param mode режим отображения: 1 - отображать сохранённый цвет при включении контроллера, 0 - не отображать
      * @return массив байтов для контроллера
      **/
-    fun setStartupModeCmd(mode: Byte): List<Byte> {
-        val hi: Byte = 0
-        val lo: Byte = 0
-        val chk: Byte = 0x55
-
-        return listOf(
-            'c'.code.toByte(), 'm'.code.toByte(), 'd'.code.toByte(),
-            hi, lo, chk, // CRC?
-            ArduinoCommands.SET_STARTUP_MODE_CMD.cmd,
-            mode
-        )
+    fun setStartupModeCmd(mode: Byte): ByteArray {
+        val buffer = ByteArray(8)
+        buffer[0] = 'c'.code.toByte()
+        buffer[1] = 'm'.code.toByte()
+        buffer[2] = 'd'.code.toByte()
+        buffer[3] = 0 // hi
+        buffer[4] = 0 // lo
+        buffer[5] = 0x55 // chk
+        buffer[6] = ArduinoCommands.SET_STARTUP_MODE_CMD.cmd
+        buffer[7] = mode
+        return buffer
     }
-
 }

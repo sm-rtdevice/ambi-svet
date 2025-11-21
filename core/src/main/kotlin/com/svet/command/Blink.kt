@@ -16,7 +16,7 @@ class Blink : Command {
     }
 
     override fun buffer(): ByteArray {
-        val buffer = Utils.showSolidColorCmd(fon).toByteArray()
+        val buffer = Utils.showSolidColorCmd(fon)
 
         fon = Color(i, i, i)
         i = (i + 5) % 250
