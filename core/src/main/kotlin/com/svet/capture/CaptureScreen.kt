@@ -3,6 +3,7 @@ package com.svet.capture
 import com.svet.config.CaptureConfig
 import com.svet.config.SvetConfig
 import com.svet.processor.ImageProcessorUtils
+import com.svet.utils.Utils.hiLoChk
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.awt.Color
 import java.awt.Rectangle
@@ -23,12 +24,13 @@ class CaptureScreen {
     private val buffer = ByteArray(captureConfig.initialCapacity)
 
     init {
+        val (hi, lo, chk) = hiLoChk(captureConfig.dataLen())
         buffer[0] = 'A'.code.toByte()
         buffer[1] = 'd'.code.toByte()
         buffer[2] = 'a'.code.toByte()
-        buffer[3] = 0 // hi
-        buffer[4] = 0 // lo
-        buffer[5] = 0x55 // chk
+        buffer[3] = hi
+        buffer[4] = lo
+        buffer[5] = chk
         for (i in 6..buffer.lastIndex) {
             buffer[i] = 0
         }

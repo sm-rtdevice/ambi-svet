@@ -1,7 +1,7 @@
 package com.svet.command
 
+import com.svet.cmd.AdaPacket
 import com.svet.config.SvetConfig
-import com.svet.utils.Utils
 
 /**
  * Команда контроллера для вывода случайного цвета.
@@ -15,6 +15,6 @@ class RandomColor : Command {
     }
 
     override fun buffer(): ByteArray {
-        return Utils.preparerRandomBuffer(captureConfig)
+        return AdaPacket.showRandomColors(captureConfig)
     }
 }

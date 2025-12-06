@@ -1,7 +1,7 @@
 package com.svet.command
 
+import com.svet.cmd.AdaPacket
 import com.svet.processor.ImageProcessorUtils
-import com.svet.utils.Utils
 import java.awt.Color
 
 /**
@@ -21,7 +21,7 @@ class Gradient : Command {
     }
 
     override fun buffer(): ByteArray {
-        val buffer = Utils.showSolidColorCmd(colors[i])
+        val buffer = AdaPacket.showSolidColor(colors[i])
         // в одном направлении
 //        i = (i + direction) % (steps + 1)
 

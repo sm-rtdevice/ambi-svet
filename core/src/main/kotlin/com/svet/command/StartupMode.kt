@@ -1,6 +1,6 @@
 package com.svet.command
 
-import com.svet.utils.Utils
+import com.svet.cmd.AdaPacket
 
 /**
  * Команда контроллера для установки режима запуска контроллера.
@@ -12,6 +12,6 @@ class StartupMode(private val mode: Byte) : Command {
     }
 
     override fun buffer(): ByteArray {
-        return Utils.setStartupModeCmd(mode)
+        return AdaPacket.setStartupMode(mode)
     }
 }
