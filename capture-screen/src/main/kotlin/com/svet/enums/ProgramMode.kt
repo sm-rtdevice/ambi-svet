@@ -13,9 +13,9 @@ enum class ProgramMode(val mode: Int) {
 
     EXIT_PROGRAM(7),
 
-    RANDOM_SCENE(7),
-    BLINK(8),
-    GRADIENT(9),
+    RANDOM_SCENE(8),
+    BLINK(9),
+    GRADIENT(10),
 
     TEST_MODE(999);
 
