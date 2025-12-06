@@ -48,6 +48,8 @@ class CaptureConfig {
     // ширина рамки
     var border: Int = 1
 
+    fun dataLen() = ledsCount * 3
+
     private fun defaultConfig() {
         outputDirection = OutputDirection.CLOCKWISE
 

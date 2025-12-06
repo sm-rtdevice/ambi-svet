@@ -1,6 +1,6 @@
 package com.svet.command
 
-import com.svet.utils.Utils
+import com.svet.cmd.AdaPacket
 import java.awt.Color
 
 /**
@@ -16,7 +16,7 @@ class Blink : Command {
     }
 
     override fun buffer(): ByteArray {
-        val buffer = Utils.showSolidColorCmd(fon)
+        val buffer = AdaPacket.showSolidColor(fon)
 
         fon = Color(i, i, i)
         i = (i + 5) % 250

@@ -1,6 +1,6 @@
 package com.svet.command
 
-import com.svet.utils.Utils
+import com.svet.cmd.AdaPacket
 import java.awt.Color
 
 /**
@@ -13,6 +13,6 @@ class SolidColor(private val color: Color, private val save: Boolean = false) : 
     }
 
     override fun buffer(): ByteArray {
-        return Utils.showSolidColorCmd(color, save)
+        return AdaPacket.showSolidColor(color, save)
     }
 }
