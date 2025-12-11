@@ -7,6 +7,7 @@ import com.svet.command.Gradient
 import com.svet.command.RandomColor
 import com.svet.command.SolidColor
 import com.svet.command.StartupMode
+import com.svet.command.TestLeds
 import com.svet.enums.ExitStatus
 import com.svet.enums.ProgramMode
 import com.svet.enums.ProgramMode.CAPTURE
@@ -21,6 +22,7 @@ import com.svet.enums.ProgramMode.CONNECT
 import com.svet.enums.ProgramMode.RECONNECT
 import com.svet.enums.ProgramMode.DISCONNECT
 import com.svet.enums.ProgramMode.EXIT_PROGRAM
+import com.svet.enums.ProgramMode.TEST_LEDS
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.awt.Color
 import kotlin.system.exitProcess
@@ -85,6 +87,10 @@ class Svet {
             }
             GRADIENT -> {
                 commandProcessor.launch(Gradient())
+            }
+            TEST_LEDS -> {
+                val ledsCount = ParamParser.parse(args, 1)
+                commandProcessor.launch(TestLeds(ledsCount))
             }
             TEST_MODE -> {
                 // testing development mode

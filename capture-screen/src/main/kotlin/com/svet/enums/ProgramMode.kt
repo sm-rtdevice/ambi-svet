@@ -16,7 +16,7 @@ enum class ProgramMode(val mode: Int) {
     RANDOM_SCENE(8),
     BLINK(9),
     GRADIENT(10),
-
+    TEST_LEDS(11),
     TEST_MODE(999);
 
     companion object {

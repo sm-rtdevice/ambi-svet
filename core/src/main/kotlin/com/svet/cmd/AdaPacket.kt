@@ -6,6 +6,32 @@ import com.svet.utils.Utils.hiLoChk
 import java.awt.Color
 
 object AdaPacket {
+
+    /**
+     * Тестирование светодной ленты.
+     *
+     * @param ledsCount количество светодиодов в ленте
+     * @return массив байтов для контроллера
+     **/
+    fun testLeds(ledsCount: Int): ByteArray {
+        val buffer = ByteArray(ledsCount * 3 + 3 + 3)
+        val (hi, lo, chk) = hiLoChk(ledsCount * 3)
+        buffer[0] = 'A'.code.toByte()
+        buffer[1] = 'd'.code.toByte()
+        buffer[2] = 'a'.code.toByte()
+        buffer[3] = hi
+        buffer[4] = lo
+        buffer[5] = chk
+
+        for (i in 0 until ledsCount) {
+            buffer[6 + 3 * i] = 0 // R
+            buffer[7 + 3 * i] = 127 // G
+            buffer[8 + 3 * i] = 0 // B
+        }
+
+        return buffer
+    }
+
     /**
      * Вывод случайного цвета на все светодиоды.
      *
