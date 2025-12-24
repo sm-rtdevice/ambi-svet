@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.jackson.databind)
 
     implementation(libs.jssc)
+    implementation(libs.jtransforms)
 
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)

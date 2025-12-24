@@ -1,6 +1,7 @@
 package com.svet.program
 
 import com.svet.capture.CommandProcessor
+import com.svet.command.ColorMusic
 import com.svet.command.Blink
 import com.svet.command.Capture
 import com.svet.command.Gradient
@@ -23,6 +24,7 @@ import com.svet.enums.ProgramMode.RECONNECT
 import com.svet.enums.ProgramMode.DISCONNECT
 import com.svet.enums.ProgramMode.EXIT_PROGRAM
 import com.svet.enums.ProgramMode.TEST_LEDS
+import com.svet.enums.ProgramMode.AUDIO_CAPTURE
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.awt.Color
 import kotlin.system.exitProcess
@@ -91,6 +93,9 @@ class Svet {
             TEST_LEDS -> {
                 val ledsCount = ParamParser.parse(args, 1)
                 commandProcessor.launch(TestLeds(ledsCount))
+            }
+            AUDIO_CAPTURE -> {
+                commandProcessor.launch(ColorMusic())
             }
             TEST_MODE -> {
                 // testing development mode
