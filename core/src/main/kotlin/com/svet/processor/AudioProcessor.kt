@@ -1,6 +1,19 @@
 package com.svet.processor
 
+import com.svet.capture.AudioState
+import com.svet.capture.FilterConst.AGC_ATTACK
+import com.svet.capture.FilterConst.AGC_MAX_GAIN_DB
+import com.svet.capture.FilterConst.AGC_MIN_GAIN_DB
+import com.svet.capture.FilterConst.AGC_RELEASE
+import com.svet.capture.FilterConst.AGC_TARGET_DB
+import com.svet.capture.FilterConst.GATE_ATTACK
+import com.svet.capture.FilterConst.GATE_RANGE_DB
+import com.svet.capture.FilterConst.GATE_RELEASE
+import com.svet.capture.FilterConst.GATE_THRESHOLD_DB
 import kotlin.math.cos
+import kotlin.math.log10
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 object AudioProcessor {
 
@@ -46,4 +59,31 @@ object AudioProcessor {
         }
     }
 
+    // Перевод входящего сигналя в децибелы (dB)
+    fun toDecibels(samples: DoubleArray): Double {
+        var sumSq = 0.0
+        for (sample in samples) {
+            sumSq += sample * sample
+        }
+        val rms = sqrt(sumSq / samples.size) // RMS (Root Mean Square)
+        val decibels = 20 * log10(rms + 1e-9)
+        return decibels
+    }
+
+    // Automatic Gain Control (AGC) — автоматическое регулирование усиления
+    fun automaticGainControl(inputDb: Double, state: AudioState): Double {
+        val diff = AGC_TARGET_DB - inputDb
+        val speed = if (diff < state.agc.gainDb) AGC_ATTACK else AGC_RELEASE // val speed = if (diff > 0) AGC_ATTACK else AGC_RELEASE
+        state.agc.gainDb += (diff - state.agc.gainDb) * speed
+        state.agc.gainDb = state.agc.gainDb.coerceIn(AGC_MIN_GAIN_DB, AGC_MAX_GAIN_DB)
+        return 10.0.pow(state.agc.gainDb / 20.0)
+    }
+
+    // Шумоподавление
+    fun noiseGate(inputDb: Double, state: AudioState): Double {
+        val gateTargetDb = if (inputDb < GATE_THRESHOLD_DB) -((GATE_THRESHOLD_DB - inputDb).coerceAtMost(GATE_RANGE_DB)) else 0.0
+        val gateSpeed = if (gateTargetDb < state.gate.attenuationDb) GATE_ATTACK else GATE_RELEASE
+        state.gate.attenuationDb += (gateTargetDb - state.gate.attenuationDb) * gateSpeed
+        return 10.0.pow(state.gate.attenuationDb / 20.0)
+    }
 }

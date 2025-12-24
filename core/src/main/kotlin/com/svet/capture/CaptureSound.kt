@@ -1,16 +1,13 @@
 package com.svet.capture
 
-import com.svet.capture.FilterConst.AGC_ATTACK
-import com.svet.capture.FilterConst.AGC_MAX_GAIN_DB
-import com.svet.capture.FilterConst.AGC_MIN_GAIN_DB
-import com.svet.capture.FilterConst.AGC_RELEASE
-import com.svet.capture.FilterConst.AGC_TARGET_DB
-import com.svet.capture.FilterConst.GATE_ATTACK
-import com.svet.capture.FilterConst.GATE_RANGE_DB
-import com.svet.capture.FilterConst.GATE_RELEASE
-import com.svet.capture.FilterConst.GATE_THRESHOLD_DB
 import com.svet.capture.FilterConst.SAMPLE_RATE
-import com.svet.processor.AudioProcessor
+import com.svet.processor.AudioProcessor.applyWindowFunc
+import com.svet.processor.AudioProcessor.automaticGainControl
+import com.svet.processor.AudioProcessor.filterNoiseByFrequency
+import com.svet.processor.AudioProcessor.initHammingWindow
+import com.svet.processor.AudioProcessor.noiseGate
+import com.svet.processor.AudioProcessor.pcm16ToDouble
+import com.svet.processor.AudioProcessor.toDecibels
 import org.jtransforms.fft.DoubleFFT_1D
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
@@ -47,9 +44,12 @@ class CaptureSound {
 
     val buffer = ByteArray(bufferSize)
     val samples = DoubleArray(bufferSize / 2)
+    val fft = DoubleFFT_1D(samples.size.toLong())
+    val fftData = DoubleArray(samples.size * 2)
+    val magnitudes = DoubleArray(samples.size / 2)
     val frequencies = IntArray(BANDS.size) { 0 }
 
-    val windowFunc = AudioProcessor.initHammingWindow(bufferSize / 2)
+    val windowFunc = initHammingWindow(bufferSize / 2)
     val state = AudioState(BANDS.size)
 
     var thread: Thread? = null
@@ -65,10 +65,10 @@ class CaptureSound {
                 val bytesRead = mic.read(buffer, 0, buffer.size)
                 if (bytesRead < bufferSize) continue
 
-                AudioProcessor.pcm16ToDouble(buffer, samples)
-                AudioProcessor.applyWindowFunc(windowFunc, samples)
-                analogToFrequencies(samples, state, frequencies)
-                AudioProcessor.filterNoiseByFrequency(frequencies, FREQUENCY_NOISE_LEVELS)
+                pcm16ToDouble(buffer, samples)
+                applyWindowFunc(windowFunc, samples)
+                analogToFrequencies(samples, state, fft, fftData, magnitudes, frequencies)
+                filterNoiseByFrequency(frequencies, FREQUENCY_NOISE_LEVELS)
 
 //                eqFrequency(BANDS, frequency)
                 println(frequencies.joinToString(", ") { "%d".format(it) })
@@ -87,49 +87,38 @@ class CaptureSound {
     private fun analogToFrequencies(
         analog: DoubleArray,
         state: AudioState,
+        fft: DoubleFFT_1D,
+        fftData: DoubleArray,
+        magnitudes: DoubleArray,
         frequencies: IntArray
     ) {
         val n = analog.size
 
         // ---------- 1. RMS входа ----------
-        var sumSq = 0.0
-        for (v in analog) sumSq += v * v
-        val rms = sqrt(sumSq / n)
-        val inputDb = 20 * log10(rms + 1e-9)
-//        println("RMS: $rms, inputDb: $inputDb")
+        val inputDb = toDecibels(analog)
+//        println("inputDb: $inputDb")
 
         // ---------- 2. AGC ----------
-        val diff = AGC_TARGET_DB - inputDb
-        val speed = if (diff < state.agc.gainDb) AGC_ATTACK else AGC_RELEASE
-        state.agc.gainDb += (diff - state.agc.gainDb) * speed
-        state.agc.gainDb = state.agc.gainDb.coerceIn(AGC_MIN_GAIN_DB, AGC_MAX_GAIN_DB)
-        val agcGain = 10.0.pow(state.agc.gainDb / 20.0)
+        val agcGain = automaticGainControl(inputDb, state)
 //        println("AGC gain: ${state.agc.gainDb}")
 
         // ---------- 3. Noise Gate ----------
-        val gateTargetDb = if (inputDb < GATE_THRESHOLD_DB) -((GATE_THRESHOLD_DB - inputDb).coerceAtMost(GATE_RANGE_DB)) else 0.0
-        val gateSpeed = if (gateTargetDb < state.gate.attenuationDb) GATE_ATTACK else GATE_RELEASE
-        state.gate.attenuationDb += (gateTargetDb - state.gate.attenuationDb) * gateSpeed
-        val gateGain = 10.0.pow(state.gate.attenuationDb / 20.0)
+        val gateGain = noiseGate(inputDb, state)
 //        println("agcGain: $agcGain gateGain: $gateGain")
 
         // ---------- 4. FFT ----------
-        val fftData = DoubleArray(n * 2)
         for (i in 0 until n) {
             fftData[2 * i] = analog[i] * agcGain * gateGain
             fftData[2 * i + 1] = 0.0
         }
 
-        val fft = DoubleFFT_1D(n.toLong())
         fft.complexForward(fftData)
 
-        val magnitudes = DoubleArray(n / 2)
         for (i in 0 until n / 2) {
             val re = fftData[2 * i]
             val im = fftData[2 * i + 1]
             magnitudes[i] = sqrt(re * re + im * im)
         }
-
 //        println("Magnitudes: ${magnitudes.joinToString(", ")}")
 
         // ---------- 5. Полосы + log + EMA ----------
@@ -161,13 +150,9 @@ class CaptureSound {
 //
 //            // EMA
 //            val prev = state.ema.values[i]
-//            val alpha =
-//                if (normalized > prev) EMA_ATTACK else EMA_RELEASE
-//
-//            val smoothed = alpha * normalized + (1 - alpha) * prev
-//
-//            state.ema.values[i] = smoothed
-//            frequencies[i] = smoothed.toInt()
+//            val alpha = if (normalized > prev) EMA_ATTACK else EMA_RELEASE
+//            state.ema.values[i] = alpha * normalized + (1 - alpha) * prev
+//            frequencies[i] = state.ema.values[i].toInt()
         }
     }
 
