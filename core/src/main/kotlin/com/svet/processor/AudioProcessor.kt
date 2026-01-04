@@ -6,10 +6,15 @@ import com.svet.capture.FilterConst.AGC_MAX_GAIN_DB
 import com.svet.capture.FilterConst.AGC_MIN_GAIN_DB
 import com.svet.capture.FilterConst.AGC_RELEASE
 import com.svet.capture.FilterConst.AGC_TARGET_DB
+import com.svet.capture.FilterConst.EMA_ATTACK
+import com.svet.capture.FilterConst.EMA_RELEASE
 import com.svet.capture.FilterConst.GATE_ATTACK
 import com.svet.capture.FilterConst.GATE_RANGE_DB
 import com.svet.capture.FilterConst.GATE_RELEASE
 import com.svet.capture.FilterConst.GATE_THRESHOLD_DB
+import com.svet.capture.FilterConst.MAX_DB
+import com.svet.capture.FilterConst.MIN_DB
+import com.svet.capture.FilterConst.OUTPUT_MAX
 import kotlin.math.cos
 import kotlin.math.log10
 import kotlin.math.pow
@@ -85,5 +90,21 @@ object AudioProcessor {
         val gateSpeed = if (gateTargetDb < state.gate.attenuationDb) GATE_ATTACK else GATE_RELEASE
         state.gate.attenuationDb += (gateTargetDb - state.gate.attenuationDb) * gateSpeed
         return 10.0.pow(state.gate.attenuationDb / 20.0)
+    }
+
+    fun normalization(frequencies: IntArray) {
+        for (i in frequencies.indices) {
+            val clampedDb = frequencies[i].toDouble().coerceIn(MIN_DB, MAX_DB)
+            frequencies[i] = (((clampedDb - MIN_DB) / (MAX_DB - MIN_DB) * OUTPUT_MAX)).toInt()
+        }
+    }
+
+    // EMA — экспоненциальне скользящее среднее
+    fun exponentialMovingAverage(frequencies: IntArray, state: AudioState) {
+        for (i in frequencies.indices) {
+            val alpha = if (frequencies[i] > state.ema.values[i]) EMA_ATTACK else EMA_RELEASE
+            state.ema.values[i] = alpha * frequencies[i] + (1 - alpha) * state.ema.values[i]
+            frequencies[i] = state.ema.values[i].toInt()
+        }
     }
 }

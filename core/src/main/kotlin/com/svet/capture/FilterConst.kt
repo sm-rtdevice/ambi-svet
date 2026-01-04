@@ -7,8 +7,8 @@ object FilterConst {
     // Клиппинг диапазона (например -80..0 dB)
     // Масштабирование в 0..100 (или любой диапазон)
     const val SAMPLE_RATE = 44100.0
-    const val MIN_DB = -80.0   // тишина
-    const val MAX_DB = 0.0     // максимум
+    const val MIN_DB = -10.0   // тишина
+    const val MAX_DB = 100.0     // максимум
     const val OUTPUT_MAX = 100 // диапазон Int
 
     // AGC автоподстройка громкости

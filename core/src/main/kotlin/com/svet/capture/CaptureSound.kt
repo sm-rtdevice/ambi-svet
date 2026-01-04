@@ -3,9 +3,11 @@ package com.svet.capture
 import com.svet.capture.FilterConst.SAMPLE_RATE
 import com.svet.processor.AudioProcessor.applyWindowFunc
 import com.svet.processor.AudioProcessor.automaticGainControl
+import com.svet.processor.AudioProcessor.exponentialMovingAverage
 import com.svet.processor.AudioProcessor.filterNoiseByFrequency
 import com.svet.processor.AudioProcessor.initHammingWindow
 import com.svet.processor.AudioProcessor.noiseGate
+import com.svet.processor.AudioProcessor.normalization
 import com.svet.processor.AudioProcessor.pcm16ToDouble
 import com.svet.processor.AudioProcessor.toDecibels
 import org.jtransforms.fft.DoubleFFT_1D
@@ -13,7 +15,9 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.DataLine
 import javax.sound.sampled.TargetDataLine
-import kotlin.math.*
+import kotlin.math.log10
+import kotlin.math.min
+import kotlin.math.sqrt
 
 // частотные полосы, мкф 50-16000
 val BANDS = intArrayOf(
@@ -143,17 +147,12 @@ class CaptureSound {
             val bandRms = sqrt(bandSumSq / count)
             val bandDb = 20 * log10(bandRms + 1e-9)
             frequencies[i] = bandDb.toInt()
-
-//            val clampedDb = bandDb.coerceIn(MIN_DB, MAX_DB)
-//
-//            val normalized = ((clampedDb - MIN_DB) / (MAX_DB - MIN_DB) * OUTPUT_MAX)
-//
-//            // EMA
-//            val prev = state.ema.values[i]
-//            val alpha = if (normalized > prev) EMA_ATTACK else EMA_RELEASE
-//            state.ema.values[i] = alpha * normalized + (1 - alpha) * prev
-//            frequencies[i] = state.ema.values[i].toInt()
         }
+
+//        normalization(frequencies)
+
+        // EMA
+//        exponentialMovingAverage(frequencies, state)
     }
 
     fun eqFrequency(bands: IntArray, frequency: IntArray) {
